@@ -1,16 +1,11 @@
 package com.stackroute.keepnote.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.stackroute.keepnote.model.Note;
@@ -30,17 +25,21 @@ public class NoteController {
 	 * which should contain the note id, title, content and status. 3. Delete an
 	 * existing note. 4. Update an existing note.
 	 */
-	
-	@Autowired
-	NoteRepository noteRepository;
-
 
 	/*
 	 * Get the application context from resources/beans.xml file using
 	 * ClassPathXmlApplicationContext() class. Retrieve the Note object from the
 	 * context. Retrieve the NoteRepository object from the context.
 	 */
+//	 ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+//	 Note note=(Note)context.getBean("note");
+//	 NoteRepository repository=(NoteRepository)context.getBean("NoteRepository");	
 
+//	@Autowired
+//	Note note;
+
+	@Autowired
+	NoteRepository repository;
 
 	/*
 	 * Define a handler method to read the existing notes by calling the
@@ -48,11 +47,10 @@ public class NoteController {
 	 * which is an implementation of Map for use when building model data for use
 	 * with views. it should map to the default URL i.e. "/"
 	 */
-	@GetMapping("/")
-	public String getNotes(ModelMap modelMap) {
-		
-		modelMap.addAttribute("notes", noteRepository.getAllNotes());
-		modelMap.addAttribute("command", new Note());
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String getNotes(ModelMap model) {
+		model.addAttribute("notes", repository.getAllNotes());
+		model.addAttribute("command", new Note());
 		return "index";
 	}
 
@@ -66,21 +64,12 @@ public class NoteController {
 	 * to the view using ModelMap. This handler method should map to the URL
 	 * "/saveNote".
 	 */
-	
-	@PostMapping("/saveNote")
-	public String add(@ModelAttribute("note")Note note, ModelMap modelMap) {
-		
-		noteRepository.addNote(note);
-		modelMap.addAttribute("notes", noteRepository.getAllNotes());
-		modelMap.addAttribute("newNote", new Note());
-		
-		/*note=context.getBean("note",Note.class);
-		List<Note> noteList=noteRepositoty.getAllNotes();
-		modelMap.addAttribute("noteList", noteList);
-		
-		note.setNoteId(note.getNoteId());
-		note.setNoteTitle(note.getNoteTitle());
-		note.setNoteContent(note.getNoteContent());*/
+	@RequestMapping(value = "/saveNote", method = RequestMethod.POST)
+	public String saveNote(@ModelAttribute("note") Note note, ModelMap model) {
+//		 System.out.println("inside save note");
+		repository.addNote(note);
+		model.addAttribute("notes", repository.getAllNotes());
+		model.addAttribute("command", new Note());
 		return "index";
 	}
 
@@ -89,14 +78,13 @@ public class NoteController {
 	 * deleteNote() method of the NoteRepository class This handler method should
 	 * map to the URL "/deleteNote"
 	 */
-	
-	@RequestMapping("/deleteNote")
-	public String deleteNote(@RequestParam int noteId,ModelMap modelMap) {
-		
-		noteRepository.deleteNote(noteId);
-		modelMap.addAttribute("notes", noteRepository.getAllNotes());
-		modelMap.addAttribute("newNote", new Note());
-		return "redirect:"+"/";
+	@RequestMapping(value = "/deleteNote")
+	public String deleteNote(@RequestParam int noteId, ModelMap model) {
+//		 System.out.println("inside delete note");
+		repository.deleteNote(noteId);
+		model.addAttribute("notes", repository.getAllNotes());
+		model.addAttribute("command", new Note());
+		return "redirect:" + "/";
 	}
 
 }
